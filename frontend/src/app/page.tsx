@@ -1,7 +1,6 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import { Heart, Flame, Star, Trophy, User, Settings, Book } from 'lucide-react';
 
 interface User {
   name: string;
@@ -10,7 +9,6 @@ interface User {
   lives: number;
   streak: number;
   gems: number;
-  currentCourse: string;
 }
 
 interface Lesson {
@@ -32,7 +30,6 @@ export default function Home() {
     lives: 4,
     streak: 7,
     gems: 150,
-    currentCourse: 'Inglés'
   });
 
   const [lessons] = useState<Lesson[]>([
@@ -53,15 +50,6 @@ export default function Home() {
       xpReward: 25,
       estimatedTime: 18,
       isPremium: false
-    },
-    {
-      id: '3',
-      title: 'Inglés de Negocios',
-      description: 'Vocabulario profesional y empresarial',
-      difficulty: 'Avanzado',
-      xpReward: 50,
-      estimatedTime: 30,
-      isPremium: true
     }
   ]);
 
@@ -71,8 +59,7 @@ export default function Home() {
   useEffect(() => {
     setMounted(true);
     
-    // Probar conexión con backend
-    const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001/api';
+    const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'https://learnlingo-platform.onrender.com/api';
     
     fetch(`${apiUrl}/database-test`)
       .then(res => {
@@ -103,44 +90,41 @@ export default function Home() {
           <div className="flex justify-between items-start mb-6">
             <div className="flex items-center gap-4">
               <div className="w-14 h-14 bg-gradient-to-br from-slate-700 to-slate-900 rounded-xl flex items-center justify-center shadow-lg">
-                <User className="w-7 h-7 text-white" />
+                <span className="text-white text-2xl">👤</span>
               </div>
               <div>
                 <h2 className="text-gray-900 font-semibold text-lg">{user.name}</h2>
-                <p className="text-gray-500 text-sm">Nivel {user.level} • {user.currentCourse}</p>
+                <p className="text-gray-500 text-sm">Nivel {user.level} • Inglés</p>
               </div>
             </div>
-            <button className="p-2 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-lg transition-colors">
-              <Settings className="w-5 h-5" />
-            </button>
           </div>
 
           {/* Stats Cards */}
           <div className="grid grid-cols-4 gap-3 mb-6">
             <div className="bg-gradient-to-br from-red-50 to-red-100 p-3 rounded-xl border border-red-200">
               <div className="flex items-center gap-2 mb-1">
-                <Heart className="w-4 h-4 text-red-500" />
+                <span className="text-red-500">❤️</span>
                 <span className="text-red-700 font-semibold text-sm">{user.lives}</span>
               </div>
               <p className="text-red-600 text-xs font-medium">Vidas</p>
             </div>
             <div className="bg-gradient-to-br from-orange-50 to-orange-100 p-3 rounded-xl border border-orange-200">
               <div className="flex items-center gap-2 mb-1">
-                <Flame className="w-4 h-4 text-orange-500" />
+                <span className="text-orange-500">🔥</span>
                 <span className="text-orange-700 font-semibold text-sm">{user.streak}</span>
               </div>
               <p className="text-orange-600 text-xs font-medium">Racha</p>
             </div>
             <div className="bg-gradient-to-br from-blue-50 to-blue-100 p-3 rounded-xl border border-blue-200">
               <div className="flex items-center gap-2 mb-1">
-                <Star className="w-4 h-4 text-blue-500" />
+                <span className="text-blue-500">⭐</span>
                 <span className="text-blue-700 font-semibold text-sm">{user.gems}</span>
               </div>
               <p className="text-blue-600 text-xs font-medium">Gemas</p>
             </div>
             <div className="bg-gradient-to-br from-emerald-50 to-emerald-100 p-3 rounded-xl border border-emerald-200">
               <div className="flex items-center gap-2 mb-1">
-                <Trophy className="w-4 h-4 text-emerald-500" />
+                <span className="text-emerald-500">🏆</span>
                 <span className="text-emerald-700 font-semibold text-sm">{user.xp}</span>
               </div>
               <p className="text-emerald-600 text-xs font-medium">XP Total</p>
@@ -164,9 +148,6 @@ export default function Home() {
           <div className="bg-red-50 border border-red-200 rounded-xl p-4 mb-6">
             <h3 className="text-red-800 font-semibold mb-2">❌ Error de Conexión</h3>
             <p className="text-red-700 text-sm">{apiError}</p>
-            <p className="text-red-600 text-xs mt-1">
-              Verificando backend...
-            </p>
           </div>
         ) : (
           <div className="bg-yellow-50 border border-yellow-200 rounded-xl p-4 mb-6">
@@ -187,17 +168,13 @@ export default function Home() {
               >
                 <div className="flex items-center gap-4">
                   <div className="w-14 h-14 rounded-xl bg-gradient-to-br from-slate-700 to-slate-900 flex items-center justify-center shadow-sm">
-                    <Book className="w-7 h-7 text-white" />
+                    <span className="text-white text-2xl">📚</span>
                   </div>
 
                   <div className="flex-1">
                     <div className="flex items-center gap-3 mb-1">
                       <h4 className="font-semibold text-gray-900">{lesson.title}</h4>
-                      <div className={`px-2 py-1 rounded-full text-xs font-medium ${
-                        lesson.difficulty === 'Principiante' ? 'bg-green-100 text-green-700' :
-                        lesson.difficulty === 'Intermedio' ? 'bg-yellow-100 text-yellow-700' :
-                        'bg-red-100 text-red-700'
-                      }`}>
+                      <div className="bg-green-100 text-green-700 px-2 py-1 rounded-full text-xs font-medium">
                         {lesson.difficulty}
                       </div>
                       {lesson.isPremium && (
