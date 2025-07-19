@@ -1,31 +1,18 @@
-// server.js - Servidor Principal LearnLingo
+// server.js - Servidor Simple LearnLingo
 const express = require('express');
 const cors = require('cors');
 const helmet = require('helmet');
-const rateLimit = require('express-rate-limit');
-const compression = require('compression');
 require('dotenv').config();
 
 const app = express();
-const PORT = process.env.PORT || 3001;
+const PORT = process.env.PORT || 10000;
 
-// Middleware de seguridad
+// Middleware básico
 app.use(helmet());
-app.use(compression());
 app.use(cors({
-  origin: process.env.NODE_ENV === 'production' 
-    ? ['https://learnlingo.app', 'https://app.learnlingo.com']
-    : ['http://localhost:3000', 'http://localhost:19006'],
+  origin: '*',
   credentials: true
 }));
-
-// Rate limiting
-const limiter = rateLimit({
-  windowMs: 15 * 60 * 1000, // 15 minutos
-  max: 100, // 100 requests por IP
-  message: 'Demasiadas solicitudes, intenta más tarde'
-});
-app.use('/api/', limiter);
 
 app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: true }));
@@ -35,7 +22,8 @@ app.get('/', (req, res) => {
   res.json({ 
     message: '🚀 LearnLingo API funcionando!',
     version: '1.0.0',
-    status: 'OK'
+    status: 'OK',
+    timestamp: new Date().toISOString()
   });
 });
 
@@ -43,18 +31,61 @@ app.get('/health', (req, res) => {
   res.json({ 
     status: 'healthy',
     timestamp: new Date().toISOString(),
-    uptime: process.uptime()
+    uptime: process.uptime(),
+    memory: process.memoryUsage()
   });
 });
 
-// Ruta de prueba para usuarios
+// API de prueba
 app.get('/api/test', (req, res) => {
   res.json({
     message: '✅ API Test successful!',
     data: {
       users: 1000,
       lessons: 50,
-      languages: ['English', 'Spanish', 'French']
+      languages: ['English', 'Spanish', 'French'],
+      features: ['Authentication', 'Payments', 'Progress Tracking']
+    },
+    timestamp: new Date().toISOString()
+  });
+});
+
+// Simulador de base de datos
+app.get('/api/database-test', (req, res) => {
+  res.json({
+    message: '✅ Base de datos simulada funcionando!',
+    stats: {
+      users: 1,
+      courses: 1,
+      lessons: 3
+    },
+    courses: [
+      {
+        id: '1',
+        name: 'Inglés',
+        lessons: [
+          { id: '1', title: 'Saludos Básicos', difficulty: 'Principiante' },
+          { id: '2', title: 'Familia y Amigos', difficulty: 'Principiante' },
+          { id: '3', title: 'Inglés de Negocios', difficulty: 'Avanzado' }
+        ]
+      }
+    ],
+    timestamp: new Date().toISOString()
+  });
+});
+
+// Ruta de usuarios (simulada)
+app.get('/api/users/profile', (req, res) => {
+  res.json({
+    user: {
+      id: '1',
+      name: 'María González',
+      email: 'maria@learnlingo.app',
+      level: 15,
+      xp: 2450,
+      lives: 4,
+      streak: 7,
+      gems: 150
     }
   });
 });
@@ -64,50 +95,26 @@ app.use((error, req, res, next) => {
   console.error('Error:', error);
   res.status(500).json({
     error: 'Error interno del servidor',
-    message: process.env.NODE_ENV === 'development' ? error.message : undefined
+    message: process.env.NODE_ENV === 'development' ? error.message : 'Algo salió mal'
   });
 });
 
 // Ruta 404
 app.use('*', (req, res) => {
-  res.status(404).json({ error: 'Ruta no encontrada' });
-});
-
-// Ruta de prueba para base de datos
-app.get('/api/database-test', async (req, res) => {
-  try {
-    const { PrismaClient } = require('@prisma/client');
-    const prisma = new PrismaClient();
-    
-    const userCount = await prisma.user.count();
-    const courses = await prisma.course.findMany({
-      include: { lessons: true }
-    });
-    
-    await prisma.$disconnect();
-    
-    res.json({
-      message: '✅ Base de datos funcionando!',
-      stats: {
-        users: userCount,
-        courses: courses.length
-      },
-      data: courses
-    });
-  } catch (error) {
-    res.status(500).json({
-      error: 'Error de BD',
-      details: error.message
-    });
-  }
+  res.status(404).json({ 
+    error: 'Ruta no encontrada',
+    path: req.originalUrl,
+    timestamp: new Date().toISOString()
+  });
 });
 
 // Iniciar servidor
-app.listen(PORT, () => {
+app.listen(PORT, '0.0.0.0', () => {
   console.log(`🚀 Servidor LearnLingo ejecutándose en puerto ${PORT}`);
   console.log(`📚 API disponible en: http://localhost:${PORT}`);
   console.log(`🏥 Health check: http://localhost:${PORT}/health`);
   console.log(`🧪 Test endpoint: http://localhost:${PORT}/api/test`);
+  console.log(`🗄️ Database test: http://localhost:${PORT}/api/database-test`);
 });
 
 module.exports = app;
