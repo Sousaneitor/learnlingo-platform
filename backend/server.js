@@ -73,6 +73,35 @@ app.use('*', (req, res) => {
   res.status(404).json({ error: 'Ruta no encontrada' });
 });
 
+// Ruta de prueba para base de datos
+app.get('/api/database-test', async (req, res) => {
+  try {
+    const { PrismaClient } = require('@prisma/client');
+    const prisma = new PrismaClient();
+    
+    const userCount = await prisma.user.count();
+    const courses = await prisma.course.findMany({
+      include: { lessons: true }
+    });
+    
+    await prisma.$disconnect();
+    
+    res.json({
+      message: '✅ Base de datos funcionando!',
+      stats: {
+        users: userCount,
+        courses: courses.length
+      },
+      data: courses
+    });
+  } catch (error) {
+    res.status(500).json({
+      error: 'Error de BD',
+      details: error.message
+    });
+  }
+});
+
 // Iniciar servidor
 app.listen(PORT, () => {
   console.log(`🚀 Servidor LearnLingo ejecutándose en puerto ${PORT}`);
